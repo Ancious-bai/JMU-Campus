@@ -15,7 +15,7 @@ import java.util.Map;
 public class LikeDataSyncScheduler {
 
     @Resource
-    PostGeneralMapper postGeneralMapper;  // 假设这是你的Mapper接口
+    PostGeneralMapper postGeneralMapper;
 
     private final HashOperations<String, Integer, Long> hashOps;
 
