@@ -46,7 +46,7 @@ public interface PostService extends IService<Post> {
 	 * @param userId  用户id，为空时查找全部
 	 * @return 分页数据
 	 */
-	ListVO<PostListVO> getUserPostListByPage(Integer current, Integer size, Integer userId);
+	ListVO<PostListVO> getUserSelfPostListByPage(Integer current, Integer size, Integer userId);
 
 	/**
 	 * 分页其他用户的帖子列表, 获取用户帖子列表使用，userId用于指定查询的用户
@@ -56,7 +56,7 @@ public interface PostService extends IService<Post> {
 	 * @param userId  用户id，为空时查找全部
 	 * @return 分页数据
 	 */
-	ListVO<PostListVO> getUserSelfPostListByPage(Integer current, Integer size, Integer userId);
+	ListVO<PostListVO> getUserPostListByPage(Integer current, Integer size, Integer userId);
 
 	/**
 	 * 获取帖子详情信息

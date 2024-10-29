@@ -33,6 +33,9 @@ public class UserViewServiceImpl extends ServiceImpl<UserViewMapper, UserView> i
 
 	@Override
 	public List<UserSimpleVO> getUserInfoList(List<Integer> userIdList) {
+		if (CollectionUtils.isEmpty(userIdList)){
+			return new ArrayList<>();
+		}
 		List<UserView> userViews = query().getBaseMapper().selectBatchIds(userIdList);
 		List<UserSimpleVO> userSimpleVOList = new ArrayList<>();
 		if (CollectionUtils.isNotEmpty(userViews)){

@@ -167,7 +167,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 	}
 
 	@Override
-	public ListVO<PostListVO> getUserPostListByPage(Integer current, Integer size, Integer userId) {
+	public ListVO<PostListVO> getUserSelfPostListByPage(Integer current, Integer size, Integer userId) {
 		LambdaQueryWrapper<PostView> wrapper = new LambdaQueryWrapper<>();
 		// userId不为空则查找用户帖子列表
 		if (userId != null) {
@@ -182,7 +182,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 	}
 
 	@Override
-	public ListVO<PostListVO> getUserSelfPostListByPage(Integer current, Integer size, Integer userId) {
+	public ListVO<PostListVO> getUserPostListByPage(Integer current, Integer size, Integer userId) {
 		LambdaQueryWrapper<PostView> wrapper = new LambdaQueryWrapper<>();
 		// userId不为空则查找用户帖子列表
 		if (userId != null) {

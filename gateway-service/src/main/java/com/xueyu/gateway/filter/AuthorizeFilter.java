@@ -19,6 +19,9 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
+import javax.jnlp.IntegrationService;
+import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import static com.xueyu.common.core.constant.RedisKeyConstant.BLACK_USER_KEY;
@@ -69,11 +72,17 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
 				// 只要token解析正确就进行返回
 				return chain.filter(exchange);
 			} catch (ExpiredJwtException e){
-				log.warn("jwt失效", e);
+				Claims claims = e.getClaims();
+				Integer userId = (Integer) claims.get("userId");
+				Integer current= (Integer) claims.get("iat");
+				Integer expired = (Integer) claims.get("exp");
+				Date createTime = new Date(Long.parseLong(current.toString()) * 1000);
+				Date expiredTime = new Date(Long.parseLong(expired.toString()) * 1000);
+				log.warn("用户id -> {} jwt失效, token创建时间:{}, 失效时间:{}", userId, createTime, expiredTime);
 				if (verifyNoAuthentication(path)){
 					return chain.filter(exchange);
 				}
-				response.setStatusCode(HttpStatus.UNAUTHORIZED);
+				response.setStatusCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
 				return response.setComplete();
 			} catch (Exception e) {
 				// 出现异常可能是token过期或恶意攻击

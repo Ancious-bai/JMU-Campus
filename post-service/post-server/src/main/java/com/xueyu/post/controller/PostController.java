@@ -19,10 +19,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 帖子服务接口
@@ -110,7 +108,7 @@ public class PostController {
 	 */
 	@GetMapping("list/user/self")
 	public RestResult<ListVO<PostListVO>> getUserSelfPost(@RequestParam(defaultValue = "1") Integer current, @RequestParam(defaultValue = "10") Integer size, @RequestHeader Integer userId) {
-		ListVO<PostListVO> postListByPage = postService.getUserPostListByPage(current, size, userId);
+		ListVO<PostListVO> postListByPage = postService.getUserSelfPostListByPage(current, size, userId);
 		return RestResult.ok(postListByPage);
 	}
 
@@ -123,7 +121,7 @@ public class PostController {
 	 */
 	@GetMapping("list/user")
 	public RestResult<ListVO<PostListVO>> getUserPost(@RequestParam(defaultValue = "1") Integer current, @RequestParam(defaultValue = "10") Integer size, @NotNull Integer userId) {
-		ListVO<PostListVO> postListByPage = postService.getUserSelfPostListByPage(current, size, userId);
+		ListVO<PostListVO> postListByPage = postService.getUserPostListByPage(current, size, userId);
 		return RestResult.ok(postListByPage);
 	}
 
