@@ -12,6 +12,9 @@ import java.util.Map;
 
 @Component
 @Slf4j
+/**
+ * 定时任务类，用于Redis和数据库的点赞数数据同步
+ */
 public class LikeDataSyncScheduler {
 
     @Resource
@@ -23,7 +26,10 @@ public class LikeDataSyncScheduler {
         this.hashOps = hashOps;
     }
 
-    // 每小时执行一次
+    /**
+     * 定时任务，每小时执行一次
+     * 将Redis中的点赞数增减情况同步到数据库中
+     */
     @Scheduled(cron = "0 0 * * * ?")
     public void refreshPostLikes() {
         String cacheKey = RedisKeyConstant.CACHE_POST_LIKES_KEY;

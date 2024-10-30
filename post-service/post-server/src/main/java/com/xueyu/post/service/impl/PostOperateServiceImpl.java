@@ -70,7 +70,13 @@ public class PostOperateServiceImpl implements PostOperateService {
 			likePostMapper.insert(likePost);
 			//postGeneralMapper.updateLikeNumByPostId(postId, 1);
 			//先将数据在 redis 中存储，使用定时任务刷新点赞数，并更新到数据库中
-			redisTemplate.opsForHash().increment(CACHE_POST_LIKES_KEY, postId, 1);
+			try{
+				redisTemplate.opsForHash().increment(CACHE_POST_LIKES_KEY, postId, 1);
+			}catch (Exception e){
+				log.error("Redis:更新点赞数失败");
+				//直接同步到数据库中
+				postGeneralMapper.updateLikeNumByPostId(postId, 1);
+			}
 			log.info("用户 id -> {} 点赞了 帖子 postId ->{}", userId, postId);
 			// 发送点赞帖子事件消息
 			rabbitTemplate.convertAndSend(POST_EXCHANGE, POST_OPERATE_LIKE_KEY, postOperateDTO);
@@ -78,7 +84,14 @@ public class PostOperateServiceImpl implements PostOperateService {
 		}
 		// 取消点赞
 		likePostMapper.delete(wrapper);
-		postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		//postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		try{
+			redisTemplate.opsForHash().increment(CACHE_POST_LIKES_KEY, postId, -1);
+		}catch (Exception e){
+			log.error("Redis:更新点赞数失败");
+			//直接同步到数据库中
+			postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		}
 		log.info("用户 id -> {} 取消点赞了 帖子 postId ->{}", userId, postId);
 		// 发送取消点赞帖子事件消息
 		rabbitTemplate.convertAndSend(POST_EXCHANGE, POST_OPERATE_LIKE_CANCEL_KEY, postOperateDTO);
