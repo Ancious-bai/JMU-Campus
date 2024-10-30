@@ -13,12 +13,15 @@ import com.xueyu.post.sdk.dto.PostOperateDTO;
 import com.xueyu.post.service.PostOperateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Objects;
 
+import static com.xueyu.common.core.constant.RedisKeyConstant.CACHE_POST_LIKES_KEY;
 import static com.xueyu.post.sdk.constant.PostMqContants.*;
 
 /**
@@ -39,6 +42,9 @@ public class PostOperateServiceImpl implements PostOperateService {
 
 	@Resource
 	RabbitTemplate rabbitTemplate;
+
+	@Resource
+	RedisTemplate<String, Integer> redisTemplate;
 
 	@Override
 	public Boolean likeUserPost(Integer postId, Integer userId) {
@@ -62,7 +68,15 @@ public class PostOperateServiceImpl implements PostOperateService {
 			likePost.setUserId(userId);
 			likePost.setTime(new Date());
 			likePostMapper.insert(likePost);
-			postGeneralMapper.updateLikeNumByPostId(postId, 1);
+			//postGeneralMapper.updateLikeNumByPostId(postId, 1);
+			//先将数据在 redis 中存储，使用定时任务刷新点赞数，并更新到数据库中
+			try{
+				redisTemplate.opsForHash().increment(CACHE_POST_LIKES_KEY, postId, 1);
+			}catch (Exception e){
+				log.error("Redis:更新点赞数失败");
+				//直接同步到数据库中
+				postGeneralMapper.updateLikeNumByPostId(postId, 1);
+			}
 			log.info("用户 id -> {} 点赞了 帖子 postId ->{}", userId, postId);
 			// 发送点赞帖子事件消息
 			rabbitTemplate.convertAndSend(POST_EXCHANGE, POST_OPERATE_LIKE_KEY, postOperateDTO);
@@ -70,7 +84,14 @@ public class PostOperateServiceImpl implements PostOperateService {
 		}
 		// 取消点赞
 		likePostMapper.delete(wrapper);
-		postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		//postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		try{
+			redisTemplate.opsForHash().increment(CACHE_POST_LIKES_KEY, postId, -1);
+		}catch (Exception e){
+			log.error("Redis:更新点赞数失败");
+			//直接同步到数据库中
+			postGeneralMapper.updateLikeNumByPostId(postId, -1);
+		}
 		log.info("用户 id -> {} 取消点赞了 帖子 postId ->{}", userId, postId);
 		// 发送取消点赞帖子事件消息
 		rabbitTemplate.convertAndSend(POST_EXCHANGE, POST_OPERATE_LIKE_CANCEL_KEY, postOperateDTO);

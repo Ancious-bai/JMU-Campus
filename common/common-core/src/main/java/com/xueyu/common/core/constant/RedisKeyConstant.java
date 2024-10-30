@@ -20,4 +20,9 @@ public class RedisKeyConstant {
 	 */
 	public static final String COMMENT_APPROVAL_KEY = "comment.approval.isOpen";
 
+	/**
+	 * 帖子点赞key
+	 */
+	public static final String CACHE_POST_LIKES_KEY = "cache:post_likes:";
+
 }
